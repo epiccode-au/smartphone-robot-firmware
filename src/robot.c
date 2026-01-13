@@ -198,6 +198,7 @@ void on_start(){
     gpio_set_irq_callback(&robot_interrupt_handler);
     irq_set_enabled(IO_IRQ_BANK0, true);
     init_queues();
+    return;
     multicore_launch_core1(core1_entry);
     i2c_start();
     adc_init();

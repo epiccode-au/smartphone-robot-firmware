@@ -87,8 +87,7 @@ target_compile_definitions(robot PUBLIC
     PICO_DEFAULT_UART_BAUD_RATE=115200
 )
 
-pico_enable_stdio_uart(robot 0)
-pico_enable_stdio_usb(robot 1)
+pico_enable_stdio_uart(robot 1)
 
 if(LOGGER STREQUAL "UART")
     target_compile_definitions(robot PUBLIC LOGGER_UART=1)
