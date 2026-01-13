@@ -36,6 +36,9 @@ static void reset_packet_and_send_nack(int8_t *start_idx, int8_t *end_idx, uint1
     }
 }
 
+#define START_READ_TIMEOUT 1000
+#define MID_READ_TIMEOUT 1000
+
 // reads data from the UART and stores it in buffer. If no data is available, returns immediately.
 // if new data is available, reads it until the buffer is full or both start and stop markers detected
 // calls handle_block to process the data if both markers are detected
@@ -47,7 +50,7 @@ void get_block() {
     uint8_t i = 0;
     uint8_t MAX_SERIAL_GET_COUNT = 100;
     
-    int c = getchar_timeout_us(100);
+    int c = getchar_timeout_us(START_READ_TIMEOUT);
     // Only process data after finding the START_MARKER
     if (c != PICO_ERROR_TIMEOUT && c == START_MARKER){
         start_idx = buffer_index;
@@ -55,7 +58,7 @@ void get_block() {
 	// to prevent an infinite loop
 	// + 1 to accomodate for the packet_type
         while (buffer_index < (ANDROID_BUFFER_LENGTH_IN + 1) || i == MAX_SERIAL_GET_COUNT) {
-            c = getchar_timeout_us(100);
+            c = getchar_timeout_us(MID_READ_TIMEOUT);
     
     	    if (c != PICO_ERROR_TIMEOUT){
     	        if (buffer_index == 0){
@@ -74,7 +77,7 @@ void get_block() {
 	    }
     	    i++;
         }
-	c = getchar_timeout_us(100);
+	c = getchar_timeout_us(MID_READ_TIMEOUT);
         if (c != PICO_ERROR_TIMEOUT && c == END_MARKER){
             // Calculate the length of the packet
             uint16_t packet_length = end_idx - start_idx;
@@ -86,7 +89,8 @@ void get_block() {
                 end_idx = -1;
                 buffer_index = 0;
                 // Reset the packet
-                memset(&incoming_packet_from_android, 0, sizeof(IncomingPacketFromAndroid)); } else {
+                memset(&incoming_packet_from_android, 0, sizeof(IncomingPacketFromAndroid));
+	    } else {
                 rp2040_log("Received incomplete packet. Resetting state.\n");
                 reset_packet_and_send_nack(&start_idx, &end_idx, &buffer_index);
                 return;
