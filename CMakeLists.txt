@@ -87,6 +87,11 @@ target_compile_definitions(robot PUBLIC
     PICO_DEFAULT_UART_BAUD_RATE=115200
 )
 
+target_compile_definitions(robot PUBLIC
+    USBD_MANUFACTURER="Topher"
+    USBD_PRODUCT="Robot"
+)
+
 pico_enable_stdio_uart(robot 0)
 pico_enable_stdio_usb(robot 1)
 
